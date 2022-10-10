@@ -8,13 +8,15 @@ export default {
       {
         test: /.[jt]sx?$/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
+          loader: 'babel-loader'
+        },
+        exclude: /node_modules/
       }
     ]
   },
-  stats: 'summary'
+  stats: 'errors-warnings',
+  output: {
+    path: path.resolve('dist'),
+    filename: 'output.js'
+  }
 }
