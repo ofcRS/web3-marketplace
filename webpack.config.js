@@ -1,8 +1,15 @@
 import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export default {
   mode: "development",
-  entry: "./src/index.tsx",
+  entry: './src/index.ts',
+  resolve: {
+    extensions: ['.js', '.ts', '.tsx']
+  },
+  plugins: [
+    new HtmlWebpackPlugin()
+  ],
   module: {
     rules: [
       {
@@ -14,9 +21,23 @@ export default {
       }
     ]
   },
-  stats: 'errors-warnings',
+  stats: 'normal',
   output: {
     path: path.resolve('dist'),
-    filename: 'output.js'
-  }
+    filename: '[name].[contenthash].js',
+    clean: true
+  },
+  optimization: {
+    moduleIds: 'deterministic',
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendors: {
+          test: /node_modules/,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
+    },
+ }
 }
