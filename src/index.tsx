@@ -1,10 +1,7 @@
-import { FC } from "react";
-import { createRoot } from 'react-dom/client';
+import React from 'react'
 
-const Test: FC = () => {
-  return <div>123</div>
-};
+import { createRoot } from 'react-dom/client'
+import { Root } from './Root'
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<Test />)
+const root = createRoot(document.getElementById('root'));
+root.render(<Root />);
