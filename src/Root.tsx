@@ -3,6 +3,8 @@ import Marketplace from "./abis/Marketplace.json";
 import Web3 from 'web3';
 import { AbiItem } from "web3-utils";
 import { Contract } from "web3-eth-contract";
+import { Product } from "./types";
+import { ProductCard } from "./components/ProductCard";
 
 const loadWeb3 = async () => {
   if (window.ethereum) {
@@ -13,13 +15,14 @@ const loadWeb3 = async () => {
     window.web3 = new Web3(window.web3.currentProvider)
   }
   else {
-    window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
+    alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
   }
 }
 
 export const Root = () => {
   const [account, setAccount] = useState<string | null>(null);
   const [marketplace, setMarketplace] = useState<Contract>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const loadBlockchainData = async () => {
     const { web3 } = window;
@@ -32,7 +35,14 @@ export const Root = () => {
 
     if (networkData) {
       const marketplace = new web3.eth.Contract(Marketplace.abi as AbiItem[], networkData.address)
-      setMarketplace(marketplace);
+      setMarketplace(marketplace as any);
+      const productCount = await marketplace.methods.productCount().call();
+      const products = [];
+      for (let i = 0; i < productCount; i++) {
+        const product = await marketplace.methods.products(i).call();
+        products.push(product)
+      }
+      setProducts(products);
     } else {
       alert('Marketplace contract is not deployed in detected network.')
     }
@@ -40,7 +50,7 @@ export const Root = () => {
 
   const createProduct = async (name, price) => {
     marketplace.methods?.createProduct(name, price).send({ from: account }).on('receipt', () => {
-      alert('Product was created')
+      loadBlockchainData()
     });
   }
 
@@ -48,6 +58,12 @@ export const Root = () => {
     await loadWeb3();
     await loadBlockchainData();
   }
+
+  const purchaseProduct = (product: Product) => {
+    marketplace.methods?.purchaseProduct(product.id).send({ from: account, value: product.price }).on('receipt', (data) => {
+      console.log(data);
+    })
+  };
 
   const isConnected = typeof account === "string";
 
@@ -75,5 +91,10 @@ export const Root = () => {
       </fieldset>
       <button type="submit">Create product</button>
     </form>
+    <div style={{ display: "flex", flexWrap: "wrap" }}>
+      {
+        products.map((product) => <ProductCard onPurchase={purchaseProduct} key={product.id} product={product} />)
+      }
+    </div>
   </main>
 }
