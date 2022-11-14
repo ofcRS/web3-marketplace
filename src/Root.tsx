@@ -93,7 +93,7 @@ export const Root = () => {
     </form>
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {
-        products.map((product) => <ProductCard onPurchase={purchaseProduct} key={product.id} product={product} />)
+        products.filter(({ purchased }) => !purchased).map((product) => <ProductCard onPurchase={purchaseProduct} key={product.id} product={product} />)
       }
     </div>
   </main>
